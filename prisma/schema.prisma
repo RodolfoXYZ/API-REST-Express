@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Student {
+  id            Int         @id @default(autoincrement())
+  name          String
+  dateOfBirth   DateTime    @map("date_of_birth")
+  registration  String      @unique
+  email         String      @unique
+  phone         String
+  enrollments   Enrollment[]
+  grades        Grade[]     
+}
+
+model Teacher {
+  id          Int       @id @default(autoincrement())
+  name        String
+  specialty   String
+  email       String    @unique
+  phone       String
+  classes     Class[]  
+}
+
+model Course {
+  id          Int           @id @default(autoincrement())
+  name        String
+  description String
+  duration    Int
+  level       String
+  classes     Class[]       
+  subjects    Subject[]     
+}
+
+model Class {
+  id          Int         @id @default(autoincrement())
+  courseId    Int         @map("course_id")
+  course      Course      @relation(fields: [courseId], references: [id])
+  teacherId   Int         @map("teacher_id")
+  teacher     Teacher     @relation(fields: [teacherId], references: [id])
+  year        Int
+  period      String
+  enrollments Enrollment[] 
+  grades      Grade[]      
+}
+
+model Subject {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  creditHours Int       @map("credit_hours")
+  courseId    Int       @map("course_id")
+  course      Course    @relation(fields: [courseId], references: [id])
+}
+
+model Grade {
+  id          Int       @id @default(autoincrement())
+  studentId   Int       @map("student_id")
+  student     Student   @relation(fields: [studentId], references: [id])
+  classId     Int       @map("class_id")
+  class       Class     @relation(fields: [classId], references: [id])
+  finalScore  Float     @map("final_score")
+  date        DateTime
+}
+
+model Enrollment {
+  id          Int       @id @default(autoincrement())
+  studentId   Int       @map("student_id")
+  student     Student   @relation(fields: [studentId], references: [id])
+  classId     Int       @map("class_id")
+  class       Class     @relation(fields: [classId], references: [id])
+  enrollmentDate DateTime @map("enrollment_date")
+  status      String
+}
